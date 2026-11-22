@@ -61,7 +61,12 @@ export function useDecidirDenunciaMutation(id: string) {
     mutationFn: (pedido: DecidirDenunciaRequest) => decidirDenuncia(id, pedido),
     onSuccess: () => {
       queryClient.setQueriesData<FilaDenuncias>({ queryKey: chavesDenuncia.filas }, semADenuncia(id));
-      void atualizar();
+      // A tela sai da análise logo em seguida: marca como velha sem buscar de novo agora.
+      void queryClient.invalidateQueries({ queryKey: chavesDenuncia.analise(id), refetchType: "none" });
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: chavesDenuncia.filas }),
+        queryClient.invalidateQueries({ queryKey: chavesQuery.dashboard }),
+      ]);
     },
     onError: (erro) => {
       if (erroApi(erro)?.codigo === CodigoErro.DENUNCIA_JA_RESOLVIDA) {
