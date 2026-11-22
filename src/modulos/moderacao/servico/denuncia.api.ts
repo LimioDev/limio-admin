@@ -1,5 +1,11 @@
 import { api } from "../../../comum/lib/api";
 import { AnaliseDenunciaSchema, type AnaliseDenuncia } from "../tipos/analise.types";
+import {
+  DecidirDenunciaRequestSchema,
+  DenunciaDecididaSchema,
+  type DecidirDenunciaRequest,
+  type DenunciaDecidida,
+} from "../tipos/decisao.types";
 import { FilaDenunciasSchema, type FilaDenuncias, type FiltroFila } from "../tipos/fila.types";
 
 /** "Listar fila de denúncias" (ETI-116): só as `ABERTA`, do prazo mais curto para o mais longo. */
@@ -14,4 +20,11 @@ export async function listarFilaDeDenuncias(filtro: FiltroFila): Promise<FilaDen
 export async function analisarDenuncia(id: string): Promise<AnaliseDenuncia> {
   const { data } = await api.get(`/admin/denuncias/${encodeURIComponent(id)}`);
   return AnaliseDenunciaSchema.parse(data);
+}
+
+/** "Decidir denúncia" (ETI-116). Tira a denúncia da fila; o admin nunca mexe em valores. */
+export async function decidirDenuncia(id: string, pedido: DecidirDenunciaRequest): Promise<DenunciaDecidida> {
+  const corpo = DecidirDenunciaRequestSchema.parse(pedido);
+  const { data } = await api.post(`/admin/denuncias/${encodeURIComponent(id)}/decisao`, corpo);
+  return DenunciaDecididaSchema.parse(data);
 }
