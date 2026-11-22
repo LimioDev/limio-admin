@@ -1,6 +1,6 @@
 import axios, { isAxiosError } from "axios";
 
-import { encerrarSessaoAdmin, lerTokenAdmin } from "../sessao/sessaoAdmin";
+import { encerrarSessaoAdmin, lerTokenAdmin, MotivoFimSessao } from "../sessao/sessaoAdmin";
 import { CodigoErro, ErroResponseSchema } from "../tipos/erros";
 
 const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
  */
 api.interceptors.response.use(undefined, (erro: unknown) => {
   if (isAxiosError(erro) && erro.response && ehFimDeSessao(erro.response.status, erro.response.data)) {
-    encerrarSessaoAdmin();
+    encerrarSessaoAdmin(MotivoFimSessao.RECUSADA_PELA_API);
   }
   return Promise.reject(erro);
 });

@@ -59,16 +59,35 @@ export function conferirTokenAdmin(token: string): MotivoTokenRecusado | null {
 /** Grava o token já conferido por `conferirTokenAdmin`. */
 export function iniciarSessaoAdmin(token: string): void {
   sessionStorage.setItem(CHAVE_TOKEN, token);
+  ultimoMotivoFim = null;
   avisarOuvintes();
 }
 
-/** Sair, 401 ou `ACESSO_NEGADO`: apaga o token e a casca do painel volta para a entrada. */
-export function encerrarSessaoAdmin(): void {
+/** Por que a sessão acabou: o admin saiu, ou a API recusou o token (401 ou `ACESSO_NEGADO`). */
+export const MotivoFimSessao = {
+  SAIU: "SAIU",
+  RECUSADA_PELA_API: "RECUSADA_PELA_API",
+} as const;
+
+export type MotivoFimSessao = (typeof MotivoFimSessao)[keyof typeof MotivoFimSessao];
+
+let ultimoMotivoFim: MotivoFimSessao | null = null;
+
+/** Apaga o token; a rota protegida volta para a entrada, que mostra o motivo. */
+export function encerrarSessaoAdmin(motivo: MotivoFimSessao): void {
   if (sessionStorage.getItem(CHAVE_TOKEN) === null) {
     return;
   }
   sessionStorage.removeItem(CHAVE_TOKEN);
+  ultimoMotivoFim = motivo;
   avisarOuvintes();
+}
+
+/** Motivo do último fim de sessão, uma vez só (a entrada mostra o aviso e esquece). */
+export function consumirMotivoFimSessao(): MotivoFimSessao | null {
+  const motivo = ultimoMotivoFim;
+  ultimoMotivoFim = null;
+  return motivo;
 }
 
 function assinar(ouvinte: Ouvinte): () => void {

@@ -16,3 +16,12 @@ export const queryClient = new QueryClient({
     mutations: { retry: false },
   },
 });
+
+/**
+ * Chaves de query usadas por mais de um módulo: a decisão (`moderacao`) invalida a fila
+ * e o contador de denúncias abertas do dashboard (`administracao`).
+ */
+export const chavesQuery = {
+  dashboard: ["admin", "dashboard"] as const,
+  denuncias: ["admin", "denuncias"] as const,
+};
